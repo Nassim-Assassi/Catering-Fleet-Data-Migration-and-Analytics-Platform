@@ -1,5 +1,5 @@
 def upload_transaction_data():
-    """Uploads transaction data to the database."""
+    """Uploads transaction data to S3."""
 
     raise NotImplementedError
 
