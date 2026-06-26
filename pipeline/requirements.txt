@@ -1,5 +1,5 @@
-boto3
-openpyxl
 pandas
-redshift_connector
 awswrangler
+python-dotenv
+sqlalchemy
+pymysql

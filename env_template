@@ -1,0 +1,16 @@
+# Static configuration for aws credentials
+AWS_ACCESS_KEY_ID =${aws_access_key_id}
+AWS_SECRET_ACCESS_KEY =${aws_secret_access_key}
+AWS_REGION =${aws_region}
+AWS_DEFAULT_REGION =${aws_region}
+
+# Static configuration for Postgres database
+DB_HOST =${db_host}
+DB_PORT =${db_port}
+DB_NAME =${db_name}
+DB_USER =${db_user}
+DB_PASSWORD =${db_password}
+
+# Variable Infrastructure variables
+S3_BUCKET_NAME =${s3_bucket_name}
+GLUE_DB_NAME =${glue_db_name}

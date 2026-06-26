@@ -1,7 +1,11 @@
 python-dotenv
 pandas
-pyarrow
 sqlalchemy
 pymysql
-ipykernel
+awswrangler
+
 matplotlib
+ipykernel
+pyarrow
+streamlit
+datetime

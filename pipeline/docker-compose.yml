@@ -1,0 +1,9 @@
+services:
+  museum-etl:
+    container_name: museum-etl-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: museum-etl-image:latest
+    env_file:
+      - ../.env

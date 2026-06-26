@@ -1,0 +1,6 @@
+awswrangler
+pandas
+streamlit
+altair
+datetime
+python-dotenv

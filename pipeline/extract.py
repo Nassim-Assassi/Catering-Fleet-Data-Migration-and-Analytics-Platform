@@ -5,7 +5,7 @@ import sys
 import pandas as pd
 from dotenv import load_dotenv
 from os import environ
-from paths import EXTRACTED_DATA_FILE
+from paths import EXTRACTED_TRUCK_DATA_FILE, EXTRACTED_PAYMENT_METHOD_DATA_FILE, EXTRACTED_TRANSACTION_DATA_FILE
 import sqlalchemy
 
 from logging_config import configure_logging, get_logger
@@ -13,20 +13,17 @@ from logging_config import configure_logging, get_logger
 logger = get_logger(__name__)
 
 
-def get_db_engine(config: dict):
+def get_db_engine(config: dict) -> sqlalchemy.engine.base.Engine:
     # Create a SQLAlchemy engine
     engine = sqlalchemy.create_engine(
         f"mysql+pymysql://{config.get('DB_USER')}:{config.get('DB_PASSWORD')}@{config.get('DB_HOST')}/{config.get('DB_NAME')}")
     return engine
 
 
-def run_extract(engine: sqlalchemy.engine.base.Engine) -> pd.DataFrame:
-
+def extract_truck_data(engine: sqlalchemy.engine.base.Engine) -> pd.DataFrame:
     query = """
-    SELECT ft.transaction_id,ft.total,ft.at,dpm.payment_method, dt.truck_name, dt.truck_description,dt.has_card_reader,dt.fsa_rating      
-    FROM FACT_Transaction ft 
-    JOIN DIM_Payment_Method dpm ON ft.payment_method_id = dpm.payment_method_id
-    JOIN DIM_Truck dt ON ft.truck_id = dt.truck_id
+    SELECT *      
+    FROM DIM_Truck dt
 """
 
     # Read data from the MySQL database into a pandas DataFrame
@@ -34,6 +31,42 @@ def run_extract(engine: sqlalchemy.engine.base.Engine) -> pd.DataFrame:
     logger.info(f"Extracted {len(df)} rows from the database.")
 
     return df
+
+
+def extract_payment_method_data(engine: sqlalchemy.engine.base.Engine) -> pd.DataFrame:
+    query = """
+    SELECT *      
+    FROM DIM_Payment_Method dpm
+"""
+
+    # Read data from the MySQL database into a pandas DataFrame
+    df = pd.read_sql(query, engine)
+    logger.info(f"Extracted {len(df)} rows from the database.")
+
+    return df
+
+
+def extract_transaction_data(engine: sqlalchemy.engine.base.Engine) -> pd.DataFrame:
+    query = """
+    SELECT *      
+    FROM FACT_Transaction ft
+"""
+
+    # Read data from the MySQL database into a pandas DataFrame
+    df = pd.read_sql(query, engine)
+    logger.info(f"Extracted {len(df)} rows from the database.")
+
+    return df
+
+
+def run_extract(engine: sqlalchemy.engine.base.Engine) -> pd.DataFrame:
+
+    # Read data from the MySQL database into a pandas DataFrame
+    truck_df = extract_truck_data(engine)
+    payment_method_df = extract_payment_method_data(engine)
+    transaction_df = extract_transaction_data(engine)
+
+    return truck_df, payment_method_df, transaction_df
 
 
 if __name__ == "__main__":
@@ -54,7 +87,7 @@ if __name__ == "__main__":
 
     try:
         logger.debug("Extracting data from database...")
-        df = run_extract(engine)
+        truck_df, payment_method_df, transaction_df = run_extract(engine)
     except Exception as e:
         logger.error(f"Failed to extract data: {e}")
         sys.exit(1)
@@ -64,8 +97,12 @@ if __name__ == "__main__":
 
     try:
         logger.debug("Saving extracted data to CSV...")
-        df.to_csv(EXTRACTED_DATA_FILE, index=False)
-        logger.info(f"Data saved to {EXTRACTED_DATA_FILE}")
+        truck_df.to_csv(EXTRACTED_TRUCK_DATA_FILE, index=False)
+        payment_method_df.to_csv(
+            EXTRACTED_PAYMENT_METHOD_DATA_FILE, index=False)
+        transaction_df.to_csv(EXTRACTED_TRANSACTION_DATA_FILE, index=False)
+        logger.info(
+            f"Data saved to {EXTRACTED_TRUCK_DATA_FILE}, {EXTRACTED_PAYMENT_METHOD_DATA_FILE}, {EXTRACTED_TRANSACTION_DATA_FILE}")
     except Exception as e:
         logger.error(f"Failed to save data to CSV: {e}")
         sys.exit(1)

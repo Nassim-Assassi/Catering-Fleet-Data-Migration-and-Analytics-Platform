@@ -6,7 +6,9 @@ terraform {
 }
 
 provider "aws" {
-  region = var.AWS_REGION
+  region     = var.AWS_REGION
+  access_key = var.AWS_ACCESS_KEY_ID
+  secret_key = var.AWS_SECRET_ACCESS_KEY
 }
 
 locals {
@@ -15,7 +17,8 @@ locals {
 
 # S3 bucket for storing data
 resource "aws_s3_bucket" "s3_bucket" {
-  bucket = "${var.INFRASTRUCTURE_NAME}-bucket"
+  bucket        = "${var.INFRASTRUCTURE_NAME}-bucket"
+  force_destroy = true
 }
 
 # Glue Catalog Database 
@@ -67,7 +70,7 @@ resource "aws_iam_role_policy" "glue_s3_access_policy" {
         Action = [
           "s3:GetObject"
         ]
-        Resource = "arn:aws:s3:::${aws_s3_bucket.s3_bucket.bucket}/data/*"
+        Resource = "arn:aws:s3:::${aws_s3_bucket.s3_bucket.bucket}/*"
       }
     ]
   })
@@ -79,6 +82,24 @@ resource "aws_glue_crawler" "glue_crawler" {
   database_name = aws_glue_catalog_database.glue_database.name
   role          = aws_iam_role.glue_service_role.arn
   s3_target {
-    path = "s3://${aws_s3_bucket.s3_bucket.bucket}/data/"
+    path = "s3://${aws_s3_bucket.s3_bucket.bucket}/"
   }
+}
+
+# Generate a .env file with sensitive information
+resource "local_sensitive_file" "infrastructure_env_file" {
+  filename = "${local.repo_root}/.env"
+  content = templatefile("${local.repo_root}/env_template", {
+    db_host        = var.DB_HOST
+    db_port        = var.DB_PORT
+    db_name        = var.DB_NAME
+    db_user        = var.DB_USER
+    db_password    = var.DB_PASSWORD
+    s3_bucket_name = aws_s3_bucket.s3_bucket.bucket
+    aws_access_key_id = var.AWS_ACCESS_KEY_ID
+    aws_secret_access_key = var.AWS_SECRET_ACCESS_KEY
+    aws_region = var.AWS_REGION
+    glue_db_name = aws_glue_catalog_database.glue_database.name
+  })
+  file_permission = "0600"
 }

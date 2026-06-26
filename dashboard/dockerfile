@@ -1,0 +1,16 @@
+# We need a base image, [image name]:[tag]
+FROM python:latest
+# an operating system, some sort of command that installs python
+
+# We need to put our files into our image
+COPY requirements.txt .
+
+# We need to install our dependencies
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Copy over project files
+COPY dashboard.py .
+COPY data_wranglers.py .
+
+# Tell docker what to do when we run the container
+CMD streamlit run dashboard.py --server.address=0.0.0.0 --server.port=8501

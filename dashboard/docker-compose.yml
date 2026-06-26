@@ -1,0 +1,11 @@
+services:
+  food-truck-dashboard:
+    container_name: food-truck-dashboard-container
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: food-truck-dashboard-image:latest
+    env_file:
+      - ../.env
+    ports:
+      - "8501:8501"
