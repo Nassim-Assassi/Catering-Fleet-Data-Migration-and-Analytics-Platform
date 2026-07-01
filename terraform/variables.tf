@@ -40,14 +40,29 @@ variable "DB_PASSWORD" {
   description = "The password for the database."
 }
 
-variable "AWS_ACCESS_KEY_ID" {
+variable "ecs_cluster_arn" {
   type        = string
-  sensitive   = true
-  description = "The AWS access key ID."
+  description = "Existing ECS cluster ARN to deploy services and tasks into."
 }
 
-variable "AWS_SECRET_ACCESS_KEY" {
+variable "vpc_id" {
   type        = string
-  sensitive   = true
-  description = "The AWS secret access key."
+  description = "VPC ID where ECS security groups will be created."
 }
+
+variable "public_subnet_id" {
+  type        = string
+  description = "Public subnet ID for internet-reachable ECS workloads."
+}
+
+variable "private_subnet_id" {
+  type        = string
+  description = "Private subnet ID for internal ECS workloads."
+}
+
+variable "private_route_table_id" {
+  type        = string
+  description = "Private route table ID for S3 gateway endpoint."
+}
+
+

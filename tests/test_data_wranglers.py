@@ -35,8 +35,8 @@ class TestLoadTotalRevenueForMonth:
             "analytics", 2026, 6)
 
         assert result == 123.45
-        assert "WHERE year = '2026'" in mock_read_sql_query.call_args.kwargs["sql"]
-        assert "AND month = '6'" in mock_read_sql_query.call_args.kwargs["sql"]
+        assert "WHERE year = 2026" in mock_read_sql_query.call_args.kwargs["sql"]
+        assert "AND month = 6" in mock_read_sql_query.call_args.kwargs["sql"]
 
 
 class TestLoadTotalSalesPerTruckForMonth:

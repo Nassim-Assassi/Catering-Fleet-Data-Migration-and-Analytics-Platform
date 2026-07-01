@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 from os import environ
 import awswrangler as wr
 from logging_config import configure_logging, get_logger
-from paths import TRANSFORMED_PAYMENT_METHOD_DATA_FILE, TRANSFORMED_TRANSACTION_DATA_FILE, TRANSFORMED_TRUCK_DATA_FILE
 
 logger = get_logger(__name__)
 
@@ -42,12 +41,15 @@ def upload_transaction_data_to_s3(bucket_name, df):
     Uploads the transformed transaction data to an S3 bucket using awswrangler.
     Data is partitioned by year, month, and day for efficient querying.
     """
+    if df.empty:
+        raise ValueError(
+            "Transaction DataFrame is empty. Pipeline will not run.")
     wr.s3.to_parquet(
         df=df,
         index=False,
         path=f"s3://{bucket_name}/Food_Trucks/FACT_Transaction",
         dataset=True,
-        mode="overwrite",
+        mode="append",
         partition_cols=['year', 'month', 'day'],
     )
 
@@ -80,6 +82,11 @@ def run_load(
 
 if __name__ == "__main__":
     configure_logging(verbose=True)
+    from paths import (
+        TRANSFORMED_PAYMENT_METHOD_DATA_FILE,
+        TRANSFORMED_TRANSACTION_DATA_FILE,
+        TRANSFORMED_TRUCK_DATA_FILE,
+    )
 
     load_dotenv()
     config: dict[str, str] = dict(environ)

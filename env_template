@@ -1,16 +1,17 @@
-# Static configuration for aws credentials
-AWS_ACCESS_KEY_ID =${aws_access_key_id}
-AWS_SECRET_ACCESS_KEY =${aws_secret_access_key}
-AWS_REGION =${aws_region}
-AWS_DEFAULT_REGION =${aws_region}
+# Sensitive credentials (DB_*, AWS access keys) are stored in AWS Secrets Manager
+# This file contains only non-sensitive infrastructure references
 
-# Static configuration for Postgres database
-DB_HOST =${db_host}
-DB_PORT =${db_port}
-DB_NAME =${db_name}
-DB_USER =${db_user}
-DB_PASSWORD =${db_password}
+AWS_REGION=${aws_region}
+AWS_DEFAULT_REGION=${aws_region}
 
-# Variable Infrastructure variables
-S3_BUCKET_NAME =${s3_bucket_name}
-GLUE_DB_NAME =${glue_db_name}
+INFRASTRUCTURE_NAME=${infrastructure_name}
+ECS_CLUSTER_ARN=${ecs_cluster_arn}
+DASHBOARD_ECS_SERVICE_NAME=${dashboard_ecs_service_name}
+DASHBOARD_ECR_REPOSITORY_URL=${dashboard_ecr_repository_url}
+DASHBOARD_IMAGE_URI=${dashboard_image_uri}
+PIPELINE_ECR_REPOSITORY_URL=${pipeline_ecr_repository_url}
+PIPELINE_TASK_DEFINITION_ARN=${pipeline_task_definition_arn}
+PIPELINE_SUBNET_ID=${pipeline_subnet_id}
+PIPELINE_SECURITY_GROUP_ID=${pipeline_security_group_id}
+IMAGE_URI=${image_uri}
+ECR_REGISTRY=${ecr_registry}

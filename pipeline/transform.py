@@ -4,14 +4,6 @@ import sys
 
 import pandas as pd
 
-from paths import (
-    EXTRACTED_PAYMENT_METHOD_DATA_FILE,
-    EXTRACTED_TRANSACTION_DATA_FILE,
-    EXTRACTED_TRUCK_DATA_FILE,
-    TRANSFORMED_PAYMENT_METHOD_DATA_FILE,
-    TRANSFORMED_TRANSACTION_DATA_FILE,
-    TRANSFORMED_TRUCK_DATA_FILE,
-)
 from logging_config import configure_logging, get_logger
 
 logger = get_logger(__name__)
@@ -249,6 +241,14 @@ def run_transform(
 
 if __name__ == "__main__":
     configure_logging(verbose=True)
+    from paths import (
+        EXTRACTED_PAYMENT_METHOD_DATA_FILE,
+        EXTRACTED_TRANSACTION_DATA_FILE,
+        EXTRACTED_TRUCK_DATA_FILE,
+        TRANSFORMED_PAYMENT_METHOD_DATA_FILE,
+        TRANSFORMED_TRANSACTION_DATA_FILE,
+        TRANSFORMED_TRUCK_DATA_FILE,
+    )
 
     try:
         logger.debug("Reading extracted DIM_Truck data...")

@@ -1,55 +1,39 @@
 import sys
 
+import awswrangler as wr
 from dotenv import load_dotenv
 from os import environ
 
 from logging_config import configure_logging, get_logger
 from extract import get_db_engine, run_extract
+from offset_helpers import get_offset_from_s3, save_offset_to_s3
 from load import run_load
 from transform import run_transform
-
 logger = get_logger(__name__)
 
 
 def run_pipeline(config: dict[str, str]) -> None:
 
-    # create a database engine
     engine = None
 
     try:
-        logger.debug("Creating database engine...")
         engine = get_db_engine(config)
-    except Exception as e:
-        logger.error(f"Failed to create database engine: {e}")
-        sys.exit(1)
-
-    # run extract
-    try:
-        logger.debug("Extracting data from database...")
-        truck_df, payment_method_df, transaction_df = run_extract(engine)
-    except Exception as e:
-        logger.error(f"Failed to extract data: {e}")
-        sys.exit(1)
-    finally:
-        if engine:
-            engine.dispose()
-
-    # run transform
-    try:
-        logger.debug("Transforming data...")
+        s3_bucket_name = config.get("S3_BUCKET_NAME")
+        if not s3_bucket_name:
+            raise ValueError("S3_BUCKET_NAME is not set in the configuration.")
+        current_offset = get_offset_from_s3(s3_bucket_name)
+        truck_df, payment_method_df, transaction_df, new_offset = run_extract(
+            engine, current_offset)
         truck_df, payment_method_df, transaction_df = run_transform(
             truck_df, payment_method_df, transaction_df
         )
-    except Exception as e:
-        logger.error(f"Failed to transform data: {e}")
-        sys.exit(1)
-
-    try:
-        logger.debug("Loading data...")
         run_load(config, truck_df, payment_method_df, transaction_df)
-    except Exception as e:
-        logger.error(f"Failed to load data: {e}")
-        sys.exit(1)
+
+        # Save offset only after successful load
+        save_offset_to_s3(s3_bucket_name, new_offset)
+    finally:
+        if engine:
+            engine.dispose()
 
 
 if __name__ == "__main__":
@@ -59,4 +43,8 @@ if __name__ == "__main__":
     load_dotenv()
     config: dict[str, str] = dict(environ)
 
-    run_pipeline(config)
+    try:
+        run_pipeline(config)
+    except Exception as e:
+        logger.error(f"Pipeline failed: {e}")
+        sys.exit(1)

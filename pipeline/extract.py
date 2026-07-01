@@ -1,12 +1,12 @@
-# This module is responsible for extracting data from the MySQL RDS instance.
-
 import sys
+import io
 
 import pandas as pd
 from dotenv import load_dotenv
 from os import environ
-from paths import EXTRACTED_TRUCK_DATA_FILE, EXTRACTED_PAYMENT_METHOD_DATA_FILE, EXTRACTED_TRANSACTION_DATA_FILE
 import sqlalchemy
+import awswrangler as wr
+from offset_helpers import get_offset_from_s3
 
 from logging_config import configure_logging, get_logger
 
@@ -46,31 +46,55 @@ def extract_payment_method_data(engine: sqlalchemy.engine.base.Engine) -> pd.Dat
     return df
 
 
-def extract_transaction_data(engine: sqlalchemy.engine.base.Engine) -> pd.DataFrame:
-    query = """
+def extract_transaction_data(engine: sqlalchemy.engine.base.Engine, offset: int) -> pd.DataFrame:
+    if offset:
+        # Build query that filters to only new transactions (ID > offset)
+        query = f"""
     SELECT *      
     FROM FACT_Transaction ft
+    WHERE transaction_id > {offset}
+    ORDER BY transaction_id ASC
+"""
+    else:
+        query = """
+    SELECT *      
+    FROM FACT_Transaction ft
+    ORDER BY transaction_id ASC
 """
 
     # Read data from the MySQL database into a pandas DataFrame
     df = pd.read_sql(query, engine)
-    logger.info(f"Extracted {len(df)} rows from the database.")
+    logger.info(f"Extracted {len(df)} new transactions from the database.")
+
+    if df.empty:
+        raise ValueError(
+            "No new transactions to process. All IDs already parsed.")
 
     return df
 
 
-def run_extract(engine: sqlalchemy.engine.base.Engine) -> pd.DataFrame:
+def run_extract(engine: sqlalchemy.engine.base.Engine, current_offset: int) -> tuple:
 
     # Read data from the MySQL database into a pandas DataFrame
     truck_df = extract_truck_data(engine)
     payment_method_df = extract_payment_method_data(engine)
-    transaction_df = extract_transaction_data(engine)
 
-    return truck_df, payment_method_df, transaction_df
+    # Extract and filter transactions
+    transaction_df = extract_transaction_data(engine, current_offset)
+
+    # Get new offset (the most recent transaction ID)
+    new_offset = transaction_df['transaction_id'].max()
+
+    return truck_df, payment_method_df, transaction_df, new_offset
 
 
 if __name__ == "__main__":
     configure_logging(verbose=True)
+    from paths import (
+        EXTRACTED_PAYMENT_METHOD_DATA_FILE,
+        EXTRACTED_TRANSACTION_DATA_FILE,
+        EXTRACTED_TRUCK_DATA_FILE,
+    )
 
     # Load environment variables from .env file
     load_dotenv()
@@ -87,7 +111,12 @@ if __name__ == "__main__":
 
     try:
         logger.debug("Extracting data from database...")
-        truck_df, payment_method_df, transaction_df = run_extract(engine)
+        s3_bucket_name = config.get("S3_BUCKET_NAME")
+        if not s3_bucket_name:
+            raise ValueError("S3_BUCKET_NAME is not set in the configuration.")
+        current_offset = get_offset_from_s3(s3_bucket_name)
+        truck_df, payment_method_df, transaction_df, new_offset = run_extract(
+            engine, current_offset)
     except Exception as e:
         logger.error(f"Failed to extract data: {e}")
         sys.exit(1)

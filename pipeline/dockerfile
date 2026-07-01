@@ -9,8 +9,8 @@ COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Copy over project files
-COPY paths.py .
 COPY logging_config.py .
+COPY offset_helpers.py .
 COPY extract.py .
 COPY transform.py .
 COPY load.py .

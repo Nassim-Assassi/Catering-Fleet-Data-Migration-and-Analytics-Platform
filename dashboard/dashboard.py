@@ -73,20 +73,20 @@ def create_average_revenue_per_truck_chart(df: pd.DataFrame, colour_scale: alt.S
     )
 
 
-def get_revenue_summary_page(config, year: int, month: int, colour_scale: alt.Scale):
+def get_revenue_summary_page(glue_db_name: str, s3_output: str, year: int, month: int, colour_scale: alt.Scale):
     formatted_month_year = get_formatted_month_year(year, month)
     st.title(
         f"Revenue Summary ({formatted_month_year})", text_alignment="center")
 
     # Load all data needed for this page
     total_revenue_per_truck = load_total_revenue_per_truck_for_month(
-        config["GLUE_DB_NAME"], year, month)
+        glue_db_name, year, month, s3_output)
 
     average_sale_value_per_truck = load_average_sale_value_per_truck_for_month(
-        config["GLUE_DB_NAME"], year, month)
+        glue_db_name, year, month, s3_output)
 
     total_revenue_this_month = load_total_revenue_for_month(
-        config["GLUE_DB_NAME"], year, month)
+        glue_db_name, year, month, s3_output)
 
     upper_col1, upper_col2, upper_col3 = st.columns(3)
     with upper_col2:
@@ -138,16 +138,16 @@ def create_truck_hour_revenue_chart(df: pd.DataFrame, colour_scale: alt.Scale) -
     )
 
 
-def get_revenue_trends_page(config, year: int, month: int, colour_scale: alt.Scale):
+def get_revenue_trends_page(glue_db_name: str, s3_output: str, year: int, month: int, colour_scale: alt.Scale):
     formatted_month_year = get_formatted_month_year(year, month)
     st.title(
         f"Revenue Trends ({formatted_month_year})", text_alignment="center")
 
     # Load all data needed for this page
     truck_day_revenue_this_month = load_truck_day_revenue_for_month(
-        config["GLUE_DB_NAME"], year, month)
+        glue_db_name, year, month, s3_output)
     truck_hour_revenue_this_month = load_truck_hour_revenue_for_month(
-        config["GLUE_DB_NAME"], year, month)
+        glue_db_name, year, month, s3_output)
 
     st.write("Total Daily Revenue Per Truck:")
     truck_day_revenue_chart = create_truck_day_revenue_chart(
@@ -176,15 +176,16 @@ def create_total_sales_per_truck_chart(df: pd.DataFrame, colour_scale: alt.Scale
     )
 
 
-def get_popularity_summary_page(config, year: int, month: int, colour_scale: alt.Scale):
+def get_popularity_summary_page(glue_db_name: str, s3_output: str, year: int, month: int, colour_scale: alt.Scale):
     formatted_month_year = get_formatted_month_year(year, month)
     st.title(
         f"Popularity Summary ({formatted_month_year})", text_alignment="center")
+
     # Load all data needed for this page
     total_sales_this_month = load_total_sales_for_month(
-        config["GLUE_DB_NAME"], year, month)
+        glue_db_name, year, month, s3_output)
     total_sales_per_truck_this_month = load_total_sales_per_truck_for_month(
-        config["GLUE_DB_NAME"], year, month)
+        glue_db_name, year, month, s3_output)
 
     upper_col1, upper_col2, upper_col3 = st.columns(3)
     with upper_col2:
@@ -231,16 +232,16 @@ def create_truck_hour_sales_chart(df: pd.DataFrame, colour_scale: alt.Scale) -> 
     )
 
 
-def get_popularity_trends_page(config, year: int, month: int, colour_scale: alt.Scale):
+def get_popularity_trends_page(glue_db_name: str, s3_output: str, year: int, month: int, colour_scale: alt.Scale):
     formatted_month_year = get_formatted_month_year(year, month)
     st.title(
         f"Popularity Trends ({formatted_month_year})", text_alignment="center")
 
     # Load all data needed for this page
     truck_day_sales_this_month = load_truck_day_sales_for_month(
-        config["GLUE_DB_NAME"], year, month)
+        glue_db_name, year, month, s3_output)
     truck_hour_sales_this_month = load_truck_hour_sales_for_month(
-        config["GLUE_DB_NAME"], year, month)
+        glue_db_name, year, month, s3_output)
 
     st.write("Total Daily Sales Per Truck:")
     truck_day_sales_chart = create_truck_day_sales_chart(
@@ -256,8 +257,12 @@ def get_popularity_trends_page(config, year: int, month: int, colour_scale: alt.
 
 
 def get_full_dashboard(config):
+    # Construct S3 output path for Athena results
+    s3_output = f"s3://{config['S3_BUCKET_NAME']}/athena-results/"
+    glue_db_name = config["GLUE_DB_NAME"]
+
     # Build one shared colour scale from the full set of truck names
-    trucks_df = load_truck_names(config["GLUE_DB_NAME"])
+    trucks_df = load_truck_names(glue_db_name, s3_output)
     truck_names = trucks_df["truck_name"].dropna()
 
     if truck_names.empty:
@@ -297,13 +302,17 @@ def get_full_dashboard(config):
         trucks_df), use_container_width=True)
 
     if selected_page == "Revenue Summary":
-        get_revenue_summary_page(config, year, month, colour_scale)
+        get_revenue_summary_page(
+            glue_db_name, s3_output, year, month, colour_scale)
     elif selected_page == "Revenue Trends":
-        get_revenue_trends_page(config, year, month, colour_scale)
+        get_revenue_trends_page(glue_db_name, s3_output,
+                                year, month, colour_scale)
     elif selected_page == "Popularity Summary":
-        get_popularity_summary_page(config, year, month, colour_scale)
+        get_popularity_summary_page(
+            glue_db_name, s3_output, year, month, colour_scale)
     elif selected_page == "Popularity Trends":
-        get_popularity_trends_page(config, year, month, colour_scale)
+        get_popularity_trends_page(
+            glue_db_name, s3_output, year, month, colour_scale)
 
 
 if __name__ == "__main__":
