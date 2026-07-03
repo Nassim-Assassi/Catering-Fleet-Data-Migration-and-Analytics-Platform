@@ -1,0 +1,15 @@
+FROM public.ecr.aws/lambda/python:latest
+
+WORKDIR ${LAMBDA_TASK_ROOT}
+
+# Copy requirements file and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY report_generator.py .
+COPY report_data_wranglers.py .
+
+# Set the Lambda handler
+# Format: filename.function_name
+CMD ["report_generator.handler"]

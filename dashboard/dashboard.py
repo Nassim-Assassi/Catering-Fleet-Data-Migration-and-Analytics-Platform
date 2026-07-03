@@ -6,7 +6,7 @@ from datetime import date
 from os import environ
 from dotenv import load_dotenv
 
-from data_wranglers import (
+from dashboard_data_wranglers import (
     load_average_sale_value_per_truck_for_month,
     load_total_revenue_for_month,
     load_total_revenue_per_truck_for_month,

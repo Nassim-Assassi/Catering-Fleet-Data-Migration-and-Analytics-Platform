@@ -51,13 +51,6 @@ resource "aws_security_group" "pipeline" {
   description = "Security group for scheduled pipeline task"
   vpc_id      = var.vpc_id
 
-  ingress {
-    from_port = 443
-    to_port   = 443
-    protocol  = "tcp"
-    self      = true
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -168,49 +161,6 @@ resource "aws_iam_role_policy" "eventbridge_scheduler_policy" {
   })
 }
 
-resource "aws_vpc_endpoint" "secrets_manager" {
-  vpc_id              = var.vpc_id
-  service_name        = "com.amazonaws.${var.AWS_REGION}.secretsmanager"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = [var.private_subnet_id]
-  security_group_ids  = [aws_security_group.pipeline.id]
-  private_dns_enabled = true
-}
-
-resource "aws_vpc_endpoint" "ecr_api" {
-  vpc_id              = var.vpc_id
-  service_name        = "com.amazonaws.${var.AWS_REGION}.ecr.api"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = [var.private_subnet_id]
-  security_group_ids  = [aws_security_group.pipeline.id]
-  private_dns_enabled = true
-}
-
-resource "aws_vpc_endpoint" "ecr_dkr" {
-  vpc_id              = var.vpc_id
-  service_name        = "com.amazonaws.${var.AWS_REGION}.ecr.dkr"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = [var.private_subnet_id]
-  security_group_ids  = [aws_security_group.pipeline.id]
-  private_dns_enabled = true
-}
-
-resource "aws_vpc_endpoint" "cloudwatch_logs" {
-  vpc_id              = var.vpc_id
-  service_name        = "com.amazonaws.${var.AWS_REGION}.logs"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = [var.private_subnet_id]
-  security_group_ids  = [aws_security_group.pipeline.id]
-  private_dns_enabled = true
-}
-
-resource "aws_vpc_endpoint" "s3" {
-  vpc_id            = var.vpc_id
-  service_name      = "com.amazonaws.${var.AWS_REGION}.s3"
-  vpc_endpoint_type = "Gateway"
-  route_table_ids   = [var.private_route_table_id]
-}
-
 resource "aws_scheduler_schedule" "pipeline" {
   name                         = "${var.INFRASTRUCTURE_NAME}-pipeline-schedule"
   group_name                   = "default"
@@ -238,8 +188,8 @@ resource "aws_scheduler_schedule" "pipeline" {
       task_count          = 1
 
       network_configuration {
-        assign_public_ip = false
-        subnets          = [var.private_subnet_id]
+        assign_public_ip = true
+        subnets          = [var.public_subnet_id]
         security_groups  = [aws_security_group.pipeline.id]
       }
     }

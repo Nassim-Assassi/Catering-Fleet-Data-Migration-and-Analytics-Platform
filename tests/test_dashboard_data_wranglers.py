@@ -1,4 +1,4 @@
-import data_wranglers
+import dashboard_data_wranglers as data_wranglers
 import sys
 import types
 from unittest.mock import Mock

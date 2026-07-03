@@ -12,7 +12,7 @@ resource "local_sensitive_file" "infrastructure_env_file" {
     dashboard_image_uri   = "${aws_ecr_repository.dashboard_ecr.repository_url}:latest"
     pipeline_ecr_repository_url = aws_ecr_repository.pipeline_ecr.repository_url
     pipeline_task_definition_arn = aws_ecs_task_definition.pipeline.arn
-    pipeline_subnet_id    = var.private_subnet_id
+    pipeline_subnet_id    = var.public_subnet_id
     pipeline_security_group_id = aws_security_group.pipeline.id
     image_uri             = "${aws_ecr_repository.pipeline_ecr.repository_url}:latest"
     ecr_registry          = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.AWS_REGION}.amazonaws.com"

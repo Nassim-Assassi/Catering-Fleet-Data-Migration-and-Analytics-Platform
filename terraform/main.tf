@@ -24,6 +24,7 @@ locals {
   fact_projection_year_start = 2026
   fact_projection_year_end   = tonumber(formatdate("YYYY", timestamp())) + 1
   my_public_ip               = chomp(data.http.public_ip.response_body)
+  deploy_report_lambda       = lower(var.deploy_report_generator_lambda) == "yes" ? true : false
 }
 
 # Shared ECS task execution role used by all ECS tasks

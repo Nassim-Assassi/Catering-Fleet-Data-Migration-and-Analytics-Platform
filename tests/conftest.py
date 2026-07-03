@@ -15,6 +15,7 @@ def _add_path(path: Path) -> None:
 
 _add_path(ROOT_DIR / "pipeline")
 _add_path(ROOT_DIR / "dashboard")
+_add_path(ROOT_DIR / "report")
 _add_path(ROOT_DIR / ".utils")
 
 

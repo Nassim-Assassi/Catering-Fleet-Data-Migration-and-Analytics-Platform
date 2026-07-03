@@ -25,7 +25,7 @@ TASK_ARN=$(aws ecs run-task \
   --cluster "${ECS_CLUSTER_ARN}" \
   --task-definition "${PIPELINE_TASK_DEFINITION_ARN}" \
   --launch-type FARGATE \
-  --network-configuration "awsvpcConfiguration={subnets=[${PIPELINE_SUBNET_ID}],securityGroups=[${PIPELINE_SECURITY_GROUP_ID}],assignPublicIp=DISABLED}" \
+  --network-configuration "awsvpcConfiguration={subnets=[${PIPELINE_SUBNET_ID}],securityGroups=[${PIPELINE_SECURITY_GROUP_ID}],assignPublicIp=ENABLED}" \
   --query 'tasks[0].taskArn' \
   --output text)
 

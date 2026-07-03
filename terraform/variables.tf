@@ -60,9 +60,18 @@ variable "private_subnet_id" {
   description = "Private subnet ID for internal ECS workloads."
 }
 
-variable "private_route_table_id" {
+variable "deploy_report_generator_lambda" {
   type        = string
-  description = "Private route table ID for S3 gateway endpoint."
-}
+  description = <<-EOT
+    Deploy the report generator Lambda function?
+    Only set to 'yes' AFTER you have pushed the Docker image to ECR using: bash report/build_and_push.sh
+    
+    Valid values: yes, no
+  EOT
 
+  validation {
+    condition     = contains(["yes", "no"], lower(var.deploy_report_generator_lambda))
+    error_message = "Must be 'yes' or 'no'"
+  }
+}
 
