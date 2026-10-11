@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Build and push report generator Docker image to ECR
+# Build and push the report generator Lambda image to ECR.
 
 set -e
 

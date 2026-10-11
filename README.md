@@ -196,7 +196,7 @@ catering-fleet-data-platform/
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── scripts/
-│   ├── build_and_push.sh
+│   ├── deploy_report_generator.sh
 │   ├── deploy_pipeline.sh
 │   ├── run_pipeline.sh
 │   ├── start_dashboard.sh
@@ -311,7 +311,7 @@ After the initial Terraform deployment:
 From the repository root, run:
 
 ```bash
-bash scripts/build_and_push.sh
+bash scripts/deploy_report_generator.sh
 ```
 
 Then return to the Terraform directory and apply the updated configuration.
@@ -404,10 +404,10 @@ The local generator should create an HTML file named according to the reporting 
 daily_report_YYYY_MM_DD.html
 ```
 
-To build and push the report container image:
+To build and push the report generator Lambda container image to ECR:
 
 ```bash
-bash scripts/build_and_push.sh
+bash scripts/deploy_report_generator.sh
 ```
 
 Once the image is available in ECR and the supporting infrastructure has been provisioned, deploy the Lambda function through Terraform.

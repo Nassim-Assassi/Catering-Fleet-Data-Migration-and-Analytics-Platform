@@ -64,7 +64,7 @@ variable "deploy_report_generator_lambda" {
   type        = string
   description = <<-EOT
     Deploy the report generator Lambda function?
-    Only set to 'yes' AFTER you have pushed the Docker image to ECR using: bash scripts/build_and_push.sh
+    Only set to 'yes' AFTER you have pushed the report generator Lambda image to ECR using: bash scripts/deploy_report_generator.sh
     
     Valid values: yes, no
   EOT
