@@ -32,11 +32,14 @@ class TestLoadTotalRevenueForMonth:
                             "read_sql_query", mock_read_sql_query)
 
         result = data_wranglers.load_total_revenue_for_month(
-            "analytics", 2026, 6)
+            "analytics", 2026, 6, "s3://test-bucket/athena-results/")
 
         assert result == 123.45
         assert "WHERE year = 2026" in mock_read_sql_query.call_args.kwargs["sql"]
         assert "AND month = 6" in mock_read_sql_query.call_args.kwargs["sql"]
+        assert mock_read_sql_query.call_args.kwargs["s3_output"] == (
+            "s3://test-bucket/athena-results/"
+        )
 
 
 class TestLoadTotalSalesPerTruckForMonth:
@@ -47,6 +50,9 @@ class TestLoadTotalSalesPerTruckForMonth:
                             "read_sql_query", mock_read_sql_query)
 
         result = data_wranglers.load_total_sales_per_truck_for_month(
-            "analytics", 2026, 6)
+            "analytics", 2026, 6, "s3://test-bucket/athena-results/")
 
         assert result.equals(expected_df)
+        assert mock_read_sql_query.call_args.kwargs["s3_output"] == (
+            "s3://test-bucket/athena-results/"
+        )
