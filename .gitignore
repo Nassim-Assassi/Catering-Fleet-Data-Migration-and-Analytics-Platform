@@ -108,7 +108,3 @@ venv/
 
 *key*
 *.pub
-
-*test_load_data*
-
-*.html

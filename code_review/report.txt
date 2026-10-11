@@ -1,7 +1,0 @@
-./pipeline/load.py
-************* Module .pylintrc
-.pylintrc:1:0: E0015: Unrecognized option found: suggestion-mode (unrecognized-option)
-
-------------------------------------
-Your code has been rated at 10.00/10
-

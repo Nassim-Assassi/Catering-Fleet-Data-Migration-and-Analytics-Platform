@@ -16,7 +16,6 @@ set +a
 : "${AWS_REGION:?AWS_REGION is required in .env}"
 : "${IMAGE_URI:?IMAGE_URI is required in .env}"
 : "${ECR_REGISTRY:?ECR_REGISTRY is required in .env}"
-
 echo "Logging into ECR registry '${ECR_REGISTRY}'..."
 aws ecr get-login-password --region "${AWS_REGION}" \
   | docker login --username AWS --password-stdin "${ECR_REGISTRY}"
