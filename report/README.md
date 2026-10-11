@@ -20,7 +20,7 @@ See [report_plan.md](report_plan.md) for the full design/thresholds behind the f
 - `local_report_generator.py`: Runs the report generator locally and writes the HTML to a file instead of uploading to S3.
 - `requirements.txt`: Python dependencies for the report generator.
 - `dockerfile`: builds the Lambda container image (based on `public.ecr.aws/lambda/python:latest`).
-- `build_and_push.sh`: builds the Docker image for `linux/x86_64` and pushes it to ECR.
+- `scripts/build_and_push.sh`: builds the Docker image for `linux/x86_64` and pushes it to ECR.
 - `report_plan.md`: design notes for report sections, thresholds, and status colour mapping.
 
 ## Prerequisites
@@ -66,12 +66,12 @@ The report is always generated for the previous day and written to `daily_report
 This folder includes:
 
 - `dockerfile`: builds a Lambda container image with `report_generator.py` and `report_data_wranglers.py`, entry point `report_generator.handler`.
-- `build_and_push.sh`: builds the image for `linux/x86_64` (required for Lambda) and pushes it to the ECR repository provisioned by Terraform.
+- `scripts/build_and_push.sh`: builds the image for `linux/x86_64` (required for Lambda) and pushes it to the ECR repository provisioned by Terraform.
 
-To build and push the image:
+From the repository root, build and push the image with:
 
 ```bash
-./build_and_push.sh
+bash scripts/build_and_push.sh
 ```
 
 This reads `AWS_REGION` and `INFRASTRUCTURE_NAME` from `terraform/terraform.tfvars`, logs in to ECR, and pushes the image tagged `latest`.
@@ -98,5 +98,5 @@ The deployed Lambda function (created by `terraform apply` when `deploy_report_g
 	- Verify IAM permissions and that the database/tables exist in the selected AWS account/region.
 - Empty or `No data available.` tables:
 	- Check whether transactions exist for the report date (previous day) and the trailing baseline window.
-- `docker buildx` errors when running `build_and_push.sh`:
+- `docker buildx` errors when running `scripts/build_and_push.sh`:
 	- Ensure Docker Buildx is available (`docker buildx version`) and you are logged in to the correct AWS account/region.

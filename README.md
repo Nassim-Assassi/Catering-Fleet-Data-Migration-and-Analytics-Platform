@@ -184,22 +184,23 @@ catering-fleet-data-platform/
 │   ├── pipeline.py
 │   ├── requirements.txt
 │   ├── Dockerfile
-│   ├── docker-compose.yml
-│   ├── deploy_pipeline.sh
-│   └── run_pipeline.sh
+│   └── docker-compose.yml
 ├── dashboard/
 │   ├── dashboard.py
 │   ├── requirements.txt
 │   ├── Dockerfile
-│   ├── docker-compose.yml
-│   ├── start_dashboard.sh
-│   └── stop_dashboard.sh
+│   └── docker-compose.yml
 ├── report/
 │   ├── lambda_function.py
 │   ├── local_report_generator.py
 │   ├── requirements.txt
-│   ├── Dockerfile
-│   └── build_and_push.sh
+│   └── Dockerfile
+├── scripts/
+│   ├── build_and_push.sh
+│   ├── deploy_pipeline.sh
+│   ├── run_pipeline.sh
+│   ├── start_dashboard.sh
+│   └── stop_dashboard.sh
 ├── terraform/
 │   ├── main.tf
 │   ├── variables.tf
@@ -212,7 +213,7 @@ catering-fleet-data-platform/
 └── README.md
 ```
 
-The filenames shown represent the intended organisation and should be adjusted to match the actual repository.
+Run deployment scripts from the repository root with `bash scripts/<script-name>.sh`. Each script resolves its component and configuration paths relative to the repository, so it can also be invoked with an absolute script path from another working directory.
 
 Each component has its own dependencies and execution instructions, allowing it to be developed, tested, and deployed independently.
 
@@ -307,11 +308,10 @@ After the initial Terraform deployment:
 2. Enable the Lambda deployment option in the Terraform configuration.
 3. Run `terraform apply` again to create the function.
 
-For example:
+From the repository root, run:
 
 ```bash
-cd report
-./build_and_push.sh
+bash scripts/build_and_push.sh
 ```
 
 Then return to the Terraform directory and apply the updated configuration.
@@ -342,14 +342,13 @@ docker compose up --build
 To deploy the scheduled pipeline:
 
 ```bash
-cd pipeline
-./deploy_pipeline.sh
+bash scripts/deploy_pipeline.sh
 ```
 
 To trigger a one-off execution:
 
 ```bash
-./run_pipeline.sh
+bash scripts/run_pipeline.sh
 ```
 
 The deployed ECS task should retrieve credentials securely, extract the latest transactions, transform the data, and upload the results to S3.
@@ -378,13 +377,13 @@ docker compose up --build
 To deploy or scale up the dashboard service:
 
 ```bash
-./start_dashboard.sh
+bash scripts/start_dashboard.sh
 ```
 
 To scale down the dashboard service when it is not required:
 
 ```bash
-./stop_dashboard.sh
+bash scripts/stop_dashboard.sh
 ```
 
 The dashboard requires permission to query Athena and access the relevant Glue database and tables.
@@ -408,7 +407,7 @@ daily_report_YYYY_MM_DD.html
 To build and push the report container image:
 
 ```bash
-./build_and_push.sh
+bash scripts/build_and_push.sh
 ```
 
 Once the image is available in ECR and the supporting infrastructure has been provisioned, deploy the Lambda function through Terraform.

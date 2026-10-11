@@ -2,7 +2,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ENV_FILE="${SCRIPT_DIR}/../.env"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+DASHBOARD_DIR="${REPO_ROOT}/dashboard"
+ENV_FILE="${REPO_ROOT}/.env"
 
 if [[ ! -f "${ENV_FILE}" ]]; then
   echo "Missing ${ENV_FILE}. Run terraform apply first to generate it." >&2
@@ -24,7 +26,7 @@ aws ecr get-login-password --region "${AWS_REGION}" \
   | docker login --username AWS --password-stdin "${ECR_REGISTRY}"
 
 echo "Building dashboard image '${DASHBOARD_IMAGE_URI}'..."
-docker build --platform=linux/amd64 -f "${SCRIPT_DIR}/dockerfile" -t "${DASHBOARD_IMAGE_URI}" "${SCRIPT_DIR}"
+docker build --platform=linux/amd64 -f "${DASHBOARD_DIR}/dockerfile" -t "${DASHBOARD_IMAGE_URI}" "${DASHBOARD_DIR}"
 
 echo "Pushing dashboard image to ECR..."
 docker push "${DASHBOARD_IMAGE_URI}"

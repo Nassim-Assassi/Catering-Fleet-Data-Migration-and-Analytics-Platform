@@ -5,7 +5,9 @@
 set -e
 
 # Get account ID and region from Terraform variables
-cd "$(dirname "$0")/.."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+cd "${REPO_ROOT}"
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 AWS_REGION=$(grep 'AWS_REGION' terraform/terraform.tfvars | grep -oE '"[^"]*"' | tr -d '"')
 INFRASTRUCTURE_NAME=$(grep 'INFRASTRUCTURE_NAME' terraform/terraform.tfvars | grep -oE '"[^"]*"' | tr -d '"')
@@ -27,12 +29,11 @@ aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS 
 # Lambda requires Docker media type manifests, not OCI - disable provenance/sbom
 # attestations and oci-mediatypes which buildx adds by default.
 echo "Building Docker image for x86_64 architecture..."
-cd report
 docker buildx build \
   --platform linux/x86_64 \
   --provenance=false \
   --sbom=false \
   --output type=image,oci-mediatypes=false,push=true \
-  -t ${IMAGE_URI} .
+  -t "${IMAGE_URI}" "${REPO_ROOT}/report"
 
 echo "Successfully pushed ${IMAGE_URI}"
