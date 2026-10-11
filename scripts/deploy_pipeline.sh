@@ -30,6 +30,6 @@ docker push "${IMAGE_URI}"
 
 echo "✓ Pipeline image deployed successfully!"
 echo "✓ The EventBridge scheduler will automatically run the pipeline task on schedule:"
-echo "  - Cron: cron(15 10,13,16 ? * MON-FRI *)"
-echo "  - Times: 10:15, 13:15, 16:15 UK time (Europe/London)"
+echo "  - Cron: cron(15 9-18/3 ? * MON-FRI *)"
+echo "  - Times: 09:15, 12:15, 15:15, 18:15 UK time (Europe/London)"
 echo "  - Days: Monday-Friday"

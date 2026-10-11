@@ -3,7 +3,7 @@ services:
     container_name: museum-etl-container
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     image: museum-etl-image:latest
     env_file:
       - ../.env
